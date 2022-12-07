@@ -35,9 +35,6 @@ function SinglePost() {
     variables: { postId: deletePostId },
   });
   const [deleteComment] = useMutation(DELETE_COMMENT, {
-    async update() {
-      // window.location.href = "/"
-    },
     variables: { postId, commentId: deleteCommentId },
   });
   const onDeletePost = async (id) => {

@@ -4,15 +4,15 @@ import { Grid, Transition } from "semantic-ui-react";
 import PostCard from "../components/PostCard";
 import { AuthContext } from "../context/auth";
 import PostForm from "../components/PostForm";
-import { FETCH_POST_QUERY, CREATE_POST_MUTATION, DELETE_POST } from "../util/graphql";
+import { FETCH_POST_QUERY, CREATE_POST_MUTATION, DELETE_POST, EDIT_POST } from "../util/graphql";
 
 function Home() {
   const { user } = useContext(AuthContext);
   const [posts, setPosts] = useState([]);
   const [values, setValues] = useState();
   const { loading, data } = useQuery(FETCH_POST_QUERY);
-  const [deletePostId,setDeletePostId] = useState()
-
+  const [postId,setPostId] = useState()
+  const [body,setBody] = useState("")
   useEffect(() => {
     if (data) {
       if (data?.getPosts) {
@@ -22,53 +22,38 @@ function Home() {
   }, [data]);
 
   const [createPost] = useMutation(CREATE_POST_MUTATION, {
-    async update(proxy, result) {
-      const refetch = proxy.readQuery({
-        query: FETCH_POST_QUERY,
-      });
-      let newData = [...refetch.getPosts];
-      newData = [result.data.createPost, ...newData];
-
-      await proxy.writeQuery({
-        query: FETCH_POST_QUERY,
-        data: {
-          ...refetch,
-          getPosts: {
-            newData,
-          },
-        },
-      });
-      await setPosts([result.data.createPost, ...refetch.getPosts]);
-    },
+    refetchQueries: [
+      {query: FETCH_POST_QUERY}, // DocumentNode object parsed with gql
+      'getPosts' // Query name
+    ],
     variables: values,
   });
 
   const [deletePost] = useMutation(DELETE_POST,{
-    async update(proxy,result){
-        const refetch = proxy.readQuery({
-          query: FETCH_POST_QUERY,
-        });
-        let newData = [...refetch.getPosts];
-        // newData = [result.data.createPost, ...newData];
-        newData = newData.filter(data => data.id !== deletePostId)
-        newData = [...newData]
-        await proxy.writeQuery({
-          query: FETCH_POST_QUERY,
-          data: {
-            getPosts: {
-              newData,
-            },
-          },
-        });
-        await setPosts([...newData]);
-      },
-    variables : {postId : deletePostId}
+    refetchQueries: [
+      {query: FETCH_POST_QUERY}, // DocumentNode object parsed with gql
+      'getPosts' // Query name
+    ],
+    variables : {postId : postId}
 })
 const onDeletePost = async(id) =>{
-  await setDeletePostId(id)
+  await setPostId(id)
   await deletePost()
 }
 
+const [editPost] = useMutation(EDIT_POST,{
+  refetchQueries: [
+    {query: FETCH_POST_QUERY}, // DocumentNode object parsed with gql
+    'getPosts' // Query name
+  ],
+  variables : {postId : postId, body : body}
+})
+
+const onEdit = async(values) =>{
+  await setPostId(values.id)
+  await setBody(values.body)
+  await editPost()
+}
   const onSubmit = async (value) => {
     await setValues(value);
     await createPost();
@@ -91,7 +76,7 @@ const onDeletePost = async(id) =>{
             {posts &&
               posts.map((post, index) => (
                 <Grid.Column key={index} style={{ marginBottom: "20px" }}>
-                  <PostCard post={post} onDelete={onDeletePost} />
+                  <PostCard post={post} onDelete={onDeletePost} onEdit={onEdit}/>
                 </Grid.Column>
               ))}
           </Transition.Group>

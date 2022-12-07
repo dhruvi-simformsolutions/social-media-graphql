@@ -5,7 +5,8 @@ import {Link} from "react-router-dom"
 import { AuthContext } from "../context/auth";
 import LikeButton from "../components/LikeButton"
 import DeletePost from "./DeletePost";
-function PostCard({onDelete,post: {body, createdAt, id,username,likeCount,commentCount,comments,likes}}){
+import EditPost from "./EditPost"
+function PostCard({onDelete,onEdit,post: {body, createdAt, id,username,likeCount,commentCount,likes}}){
   const {user} = useContext(AuthContext)
     return(
     <Card fluid>
@@ -33,6 +34,11 @@ function PostCard({onDelete,post: {body, createdAt, id,username,likeCount,commen
     {
       user && user.username === username && (
        <DeletePost postId={id} onDelete={onDelete}/>
+      )
+    }
+    {
+      user && user.username === username && (
+       <EditPost postbody={body} postId={id} onEdit={onEdit}/>
       )
     }
     </Card.Content>

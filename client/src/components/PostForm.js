@@ -1,8 +1,5 @@
 import React, { useState } from "react";
 import {Form,Button} from "semantic-ui-react"
-import gql from "graphql-tag";
-import { useMutation } from "@apollo/react-hooks";
-import { FETCH_POST_QUERY } from "../util/graphql";
 
 function PostForm({onSubmit}) {
     const [values, setValues] = useState({

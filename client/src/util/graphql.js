@@ -67,3 +67,21 @@ mutation deleteComment($postId: ID!, $commentId: ID!){
   }
 }
 `;
+
+export const EDIT_POST= gql `
+mutation updatePost($postId: ID!,$body: String!){
+  updatePost(postId: $postId,body: $body){
+    id body createdAt username 
+   likes{
+       id
+       username
+       createdAt
+   }
+   likeCount
+   commentCount
+   comments{
+       id body username createdAt
+   }
+  }
+}
+`;
